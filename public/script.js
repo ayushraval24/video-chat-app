@@ -1,13 +1,27 @@
+// HOME Page
+
+const newMeeting = document.getElementById("new-meeting");
+const meetingCode = document.getElementById("meeting-code");
+const meetingJoin = document.getElementById("meeting-join");
+
+// HOME Page END
+
 // path of the root file of server
 const socket = io("/");
 
 // since we are connecting to our own server, we need to pass some parameters
 // undefined is id which will be created by our own server
-const peer = new Peer(undefined, {
-  // host: "https://1269-27-109-17-154.in.ngrok.io/",
-  host: "/",
-  port: "8001",
+
+var peer = new Peer({
+  host: "0.peerjs.com",
+  port: 443,
+  path: "/",
+  pingInterval: 5000,
 });
+// var peer = new Peer({
+//   host: "/",
+//   port: 8001,
+// });
 
 const videoGrid = document.getElementById("video-grid");
 const video = document.createElement("video");
@@ -71,34 +85,20 @@ socket.on("user-disconnected", (userId) => {
 });
 
 socket.on("createMessage", (userName, message) => {
-  console.log("SHOULD be in both");
-  console.log("My user: ", userName, "My message: ", message);
-  // newMessage.className = "text-white";
-  // newMessage.textContent = message;
-  // messages.appendChild(newMessage);
-
-  console.log("My user ID: ", myUserId);
-  console.log("My user name: ", userName);
   const newMessage = document.createElement("p");
   const messageHtml = `<p class="text-white"> ${
     userName == myUserId ? "Me" : userName
   } : ${message}</p>`;
   newMessage.innerHTML = messageHtml;
   messages.appendChild(newMessage);
-
-  // messages.innerHTML =
-  //   messages.innerHTML +
-  //   `    <b><i class="far fa-user-circle"></i> <span> ${
-  //     userName ? "me" : userName
-  //   }</span> </b>
-  //       <span class="text-white">${message}</span>
-  //   `;
-  // socket.emit("getMessages", messages.innerHTML, userName, message);
 });
 
 // we want to run this code as soon as user connects with peer server and return id
 peer.on("open", (id) => {
   socket.emit("join-room", ROOM_ID, id);
+
+  let username = prompt("Enter your name: ");
+  socket.emit("get-username", username);
 });
 
 const connectToNewUser = (userId, stream) => {
@@ -110,9 +110,11 @@ const connectToNewUser = (userId, stream) => {
   video.style.maxHeight = "300px";
   video.className = "col";
   video.style.marginBottom = "12px";
+  console.log("CALL: ", call);
 
   // video - audio stream sent from other peer
   call.on("stream", (userVideoStream) => {
+    console.log("Add");
     addVideoStream(video, userVideoStream);
   });
 
@@ -123,10 +125,9 @@ const connectToNewUser = (userId, stream) => {
   peers[userId] = call;
 };
 
-console.log("In both 8000");
-
 // when it loads stream and video is loaded on the page - we want to play the video
 const addVideoStream = (video, stream) => {
+  console.log("INSIDE: ", video);
   video.srcObject = stream;
   video.addEventListener("loadedmetadata", () => {
     video.play();

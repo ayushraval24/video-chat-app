@@ -1,4 +1,5 @@
 // peerjs --port 8001
+const { render } = require("ejs");
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
@@ -18,6 +19,9 @@ app.get(`/:roomid`, (req, res, next) => {
   res.render("room", { roomId: req.params.roomid });
 });
 
+// app.get("/", (req, res, next) => {
+//   res.render("home");
+// });
 app.get("/", (req, res, next) => {
   res.redirect(`/${uuidv4()}`);
 });
@@ -25,19 +29,19 @@ app.get("/", (req, res, next) => {
 io.on("connection", (socket) => {
   socket.on("join-room", function (roomId, userId) {
     // to join the socket of user to room
+    let username;
     socket.join(roomId);
-
-    console.log("Room: ", roomId);
-    console.log("User: ", userId);
-    console.log("All users: ", io.sockets.adapter.rooms);
-    console.log("All users in room: ", io.sockets.adapter.rooms[roomId]);
 
     // perform action to room and broadcast - inform everyone else the person who is joining
     socket.broadcast.to(roomId).emit("user-connected", userId);
 
+    socket.on("get-username", (userName) => {
+      username = userName;
+    });
+
     socket.on("createMessage", (message) => {
       // socket.emit("message", message);
-      io.in(roomId).emit("createMessage", userId, message);
+      io.in(roomId).emit("createMessage", username, message);
       // socket.to(roomId).emit("createMessage", userId, message);
     });
 
@@ -50,3 +54,8 @@ io.on("connection", (socket) => {
 http.listen(PORT, () => {
   console.log("Server running on port ", PORT);
 });
+
+// console.log("Room: ", roomId);
+// console.log("User: ", userId);
+// console.log("All users: ", io.sockets.adapter.rooms);
+// console.log("All users in room: ", io.sockets.adapter.rooms[roomId]);
