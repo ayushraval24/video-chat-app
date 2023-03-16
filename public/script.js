@@ -1,8 +1,41 @@
 // HOME Page
+$(document).ready(() => {
+  $("#meeting-join").css("display", "none");
 
-const newMeeting = document.getElementById("new-meeting");
-const meetingCode = document.getElementById("meeting-code");
-const meetingJoin = document.getElementById("meeting-join");
+  $("#meeting-code").on("change input", function (event) {
+    if (event.target.value.length == 36) {
+      $("#meeting-join").css("display", "inline");
+    } else {
+      $("#meeting-join").css("display", "none");
+    }
+  });
+
+  $("#meeting-join").click(() => {
+    const meetingCode = $("#meeting-code").val();
+    window.location.href = `/${meetingCode}`;
+  });
+
+  $("#new-meeting").click(() => {
+    console.log("Called");
+    window.location.href = `/meeting`;
+  });
+
+  $("#copy-code").click((e) => {
+    navigator.clipboard.writeText(ROOM_ID);
+    console.log("E: ", e.target);
+    alert(`<a href="">${ROOM_ID}</a>`);
+    console.log("CODE: ", ROOM_ID);
+  });
+
+  const displayMediaOptions = {
+    video: {
+      cursor: "always",
+      height: 1000,
+      width: 1200,
+    },
+    audio: false,
+  };
+});
 
 // HOME Page END
 
@@ -115,6 +148,7 @@ const connectToNewUser = (userId, stream) => {
   // video - audio stream sent from other peer
   call.on("stream", (userVideoStream) => {
     console.log("Add");
+
     addVideoStream(video, userVideoStream);
   });
 

@@ -15,15 +15,16 @@ const io = require("socket.io")(http, {
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 
+app.get("/meeting", (req, res, next) => {
+  res.redirect(`/${uuidv4()}`);
+});
+
 app.get(`/:roomid`, (req, res, next) => {
   res.render("room", { roomId: req.params.roomid });
 });
 
-// app.get("/", (req, res, next) => {
-//   res.render("home");
-// });
 app.get("/", (req, res, next) => {
-  res.redirect(`/${uuidv4()}`);
+  res.render("home");
 });
 
 io.on("connection", (socket) => {
